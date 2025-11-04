@@ -2,7 +2,8 @@ import './App.css'
 import { useState } from 'react';
 
 function App() {
-
+  
+  //Connecter
   const [nom, setNom] = useState('');
 
   const handleChange = (e) => {
@@ -25,7 +26,7 @@ function App() {
       <form onSubmit={handleSubmit}>
         <input type='text' placeholder='Votre nom' value={nom} onChange={handleChange}/>
       </form>
-      <button type='submit'>Jouez</button>
+      <button type='submit'>Commencer</button>
     </>
   )
 }
