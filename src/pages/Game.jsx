@@ -253,8 +253,8 @@ const styles = {
     boxShadow: '0 0 0 4px rgba(255,59,48,0.5) inset, 0 8px 24px rgba(0,0,0,0.25)'
   },
   answerBadge: {
-    fontFamily: 'Press Start 2P, system-ui',
-    fontSize: '16px',
+    fontFamily: 'Patrick Hand, system-ui',
+    fontSize: '24px',
     color: '#1a1a1a',
     background: '#ffffff',
     border: '6px solid #2b64ff',
@@ -276,8 +276,10 @@ const styles = {
     borderColor: '#ff3b30',
   },
   answerLabel: {
-    fontFamily: 'Press Start 2P, system-ui',
-    fontSize: '16px',
+    fontFamily: 'Patrick Hand, system-ui',
+    fontSize: '28px',
+    letterSpacing: '0.5px',
+    textShadow: '0 2px 0 rgba(0,0,0,0.1)'
   },
   labelStrong: {
     fontWeight: 700,
