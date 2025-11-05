@@ -7,7 +7,6 @@ export default function Home() {
   const navigate = useNavigate()
   const { playerName, setPlayerName, categoryId, setCategoryId, difficulty, setDifficulty } = useQuiz()
 
-  // Liste statique temporaire (sans API)
   const categories = [
     { id: '9', name: 'Culture Générale' },
     { id: '17', name: 'Science & Nature' },

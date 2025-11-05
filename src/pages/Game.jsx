@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useQuiz } from '../context/QuizContext.jsx'
 import beachImg from '../../images/Beach.jpeg'
 
@@ -26,7 +26,36 @@ export default function Game() {
   const total = mockQuestions.length
   const [selectedIdx, setSelectedIdx] = useState(null)
   const [score, setScore] = useState(0)
+  const [timeLeft, setTimeLeft] = useState(10)
   const { playerName } = useQuiz()
+
+  useEffect(() => {
+    setTimeLeft(10)
+    setSelectedIdx(null)
+  }, [qIndex])
+
+  useEffect(() => {
+    if (selectedIdx !== null) return
+    const timer = setInterval(() => {
+      setTimeLeft((t) => {
+        if (t <= 1) {
+          clearInterval(timer)
+          setSelectedIdx(-1)
+          setTimeout(() => {
+            if (qIndex < total - 1) {
+              setQIndex((i) => i + 1)
+            } else {
+              setQIndex(0)
+              setScore(0)
+            }
+          }, 900)
+          return 0
+        }
+        return t - 1
+      })
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [selectedIdx, qIndex, total])
 
   return (
     <div style={styles.page}>
@@ -35,9 +64,23 @@ export default function Game() {
           <header style={styles.header}>
             <div style={styles.title}>QUIZ</div>
             <div style={styles.progress}>Question {qIndex + 1} / {total}</div>
-            <div style={styles.playerBox}>
-              <div style={styles.playerName}>{playerName || 'Joueur'}</div>
-              <div style={styles.playerScore}>Score: {score}</div>
+            <div style={styles.playerRow}>
+              <div style={styles.playerBox}>
+                <div style={styles.playerName}>{playerName || 'Joueur'}</div>
+                <div style={styles.playerScore}>Score: {score}</div>
+              </div>
+              <div
+                style={{
+                  ...styles.timerInline,
+                  ...(timeLeft <= 5
+                    ? styles.timerInlineDanger
+                    : timeLeft <= 10
+                    ? styles.timerInlineWarn
+                    : {}),
+                }}
+              >
+                {String(timeLeft).padStart(2, '0')}s
+              </div>
             </div>
           </header>
 
@@ -56,7 +99,6 @@ export default function Game() {
               let badgeStyle = { ...styles.answerBadge }
               let labelStyle = { ...styles.answerLabel }
 
-              // Forcer la couleur de bordure par défaut (bleu) pour toutes les ardoises
               cardStyle = { ...cardStyle, borderColor: '#2b64ff' }
               badgeStyle = { ...badgeStyle, borderColor: '#2b64ff' }
 
@@ -98,10 +140,8 @@ export default function Game() {
                 if (selectedIdx === current.correctIndex) setScore((s) => s + 1)
                 if (qIndex < total - 1) {
                   setQIndex((i) => i + 1)
-                  setSelectedIdx(null)
                 } else {
                   setQIndex(0)
-                  setSelectedIdx(null)
                   setScore(0)
                 }
               }}
@@ -149,6 +189,15 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
   },
+  playerRow: {
+    position: 'fixed',
+    top: 24,
+    left: 24,
+    zIndex: 6,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px'
+  },
   title: {
     fontFamily: 'Bangers, system-ui',
     fontSize: '64px',
@@ -169,14 +218,28 @@ const styles = {
     right: 24,
     zIndex: 5
   },
+  timerInline: {
+    fontFamily: 'Bangers, system-ui',
+    fontSize: '28px',
+    color: '#ffe27a',
+    textShadow: '0 3px 0 #1a1a1a',
+    letterSpacing: '2px',
+    lineHeight: 1,
+  },
+  timerInlineWarn: {
+    color: '#ffd37a',
+    textShadow: '0 3px 0 #a14b00'
+  },
+  timerInlineDanger: {
+    color: '#ffdfdf',
+    textShadow: '0 3px 0 #7a0b0b'
+  },
   playerBox: {
-    position: 'fixed',
-    top: 24,
-    left: 24,
     zIndex: 5,
     display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: '12px',
     padding: '12px 16px',
     borderRadius: '18px',
     background: '#ffffff',
