@@ -1,0 +1,226 @@
+.game-page {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  width: 100%;
+  background-image: url('../../images/Beach.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+}
+
+.game-overlay {
+  flex: 1;
+  background: rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.game-container {
+  width: 100%;
+  max-width: 1100px;
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 20px;
+}
+
+.game-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-title {
+  font-family: 'Bangers', system-ui;
+  font-size: 64px;
+  color: #ffe27a;
+  text-shadow: 0 4px 0 #1a1a1a;
+  letter-spacing: 2px;
+}
+
+.game-progress {
+  font-family: 'Press Start 2P', system-ui;
+  font-size: 14px;
+  color: #ffffff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.35);
+  border: 2px solid rgba(255,255,255,0.35);
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 5;
+}
+
+.game-player-box {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 6px solid #2b64ff;
+  color: #1a1a1a;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  min-width: 150px;
+}
+
+.game-player-name {
+  font-family: 'Bangers', system-ui;
+  font-size: 28px;
+  color: #ffe27a;
+  text-shadow: 0 3px 0 #1a1a1a;
+  letter-spacing: 2px;
+}
+
+.game-player-score {
+  font-family: 'Press Start 2P', system-ui;
+  font-size: 14px;
+  color: #1a1a1a;
+}
+
+.game-timer {
+  font-family: 'Press Start 2P', system-ui;
+  font-size: 12px;
+  color: #ff6a00;
+  margin-top: 4px;
+}
+
+.game-question-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  margin-top: -10px;
+}
+
+.game-question-card {
+  background: #ffffff;
+  border: 6px solid #2b64ff;
+  border-radius: 20px;
+  padding: 20px 28px;
+  color: #1a1a1a;
+  max-width: 720px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.game-question-text {
+  font-family: 'Bangers', system-ui;
+  font-size: 36px;
+  line-height: 1.1;
+  text-align: left;
+}
+
+.game-answers-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 28px;
+  row-gap: 28px;
+  margin-top: 12px;
+}
+
+.game-answer-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 24px 28px;
+  background: #ffffff;
+  border: 8px solid #2b64ff;
+  border-radius: 24px;
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: transform 0.06s ease-out, box-shadow 0.2s ease;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  min-height: 96px;
+  outline: none;
+}
+
+.game-answer-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.2);
+}
+
+.game-answer-correct {
+  border-color: #1ac05e;
+  box-shadow: 0 0 0 4px rgba(26,192,94,0.6) inset, 0 8px 24px rgba(0,0,0,0.25);
+}
+
+.game-answer-wrong {
+  border-color: #ff3b30;
+  box-shadow: 0 0 0 4px rgba(255,59,48,0.5) inset, 0 8px 24px rgba(0,0,0,0.25);
+}
+
+.game-answer-badge {
+  font-family: 'Patrick Hand', system-ui;
+  font-size: 24px;
+  color: #1a1a1a;
+  background: #ffffff;
+  border: 6px solid #2b64ff;
+  border-radius: 999px;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 3px 0 rgba(0,0,0,0.08);
+}
+
+.game-answer-correct .game-answer-badge {
+  border-color: #1ac05e;
+}
+
+.game-answer-wrong .game-answer-badge {
+  border-color: #ff3b30;
+}
+
+.game-answer-label {
+  font-family: 'Patrick Hand', system-ui;
+  font-size: 28px;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.1);
+}
+
+.game-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.game-next-btn {
+  padding: 16px 22px;
+  border-radius: 14px;
+  border: 0;
+  background: linear-gradient(180deg, #ff9a3c 0%, #ff6a00 100%);
+  color: #1a1a1a;
+  font-family: 'Press Start 2P', system-ui;
+  font-size: 14px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #8c3d00;
+  transition: transform 0.1s ease-out;
+}
+
+.game-next-btn:hover {
+  transform: translateY(-2px);
+}
+
+.game-loading {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  font-family: 'Press Start 2P', system-ui;
+  color: white;
+}
