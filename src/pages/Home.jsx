@@ -18,9 +18,9 @@ export default function Home() {
   console.log('Home - fetchQuestions:', fetchQuestions) 
 
   const categories = [
-    { id: '15', name: 'Sports' },
-    { id: '20', name: 'Informatique' },
-    { id: '15', name: 'Cinéma' },
+    { id: '21', name: 'Sports' },
+    { id: '18', name: 'Informatique' },
+    { id: '11', name: 'Cinéma' },
   ]
 
   const canStart = useMemo(() => {

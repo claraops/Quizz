@@ -16,14 +16,14 @@ export default function Game() {
   const [responseTime, setResponseTime] = useState(0)
   const [questionStartTime, setQuestionStartTime] = useState(0)
 
-  // refs pour éviter les closures avec des valeurs obsolètes
+  
   const scoreRef = useRef(score)
   const responseTimeRef = useRef(responseTime)
   const isTransitioningRef = useRef(false)
   const timeoutRef = useRef(null)
   const intervalRef = useRef(null)
 
-  // garder refs synchronisées
+  
   useEffect(() => { scoreRef.current = score }, [score])
   useEffect(() => { responseTimeRef.current = responseTime }, [responseTime])
 
@@ -161,7 +161,7 @@ export default function Game() {
       sessionStorage.setItem('lastScore', String(currentScore))
       sessionStorage.setItem('lastTotal', String(totalQuestions * 10))
     } catch (e) {
-      // ignore storage errors
+     
     }
 
     setCurrentQuestionIndex(prevIndex => {
@@ -262,22 +262,12 @@ export default function Game() {
 
           {answered && (
             <footer className="game-footer">
-              <div className="game-feedback">
-                {selectedAnswer === currentQuestion.correct_answer ? (
-                  <div className="feedback-correct">
-                    Correct ! Temps: {responseTime}s - Score: +{calculatePoints(responseTime, true)} points
-                  </div>
-                ) : (
-                  <div className="feedback-incorrect">
-                    Incorrect ! La bonne réponse était: {currentQuestion.correct_answer}
-                  </div>
-                )}
-              </div>
+              
               <button
                 type="button"
                 className="game-next-btn"
                 onClick={() => {
-                  // annuler le timeout si l'utilisateur clique manuellement
+                 
                   if (timeoutRef.current) {
                     clearTimeout(timeoutRef.current)
                     timeoutRef.current = null

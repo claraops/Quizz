@@ -36,7 +36,7 @@ export function QuizProvider({ children }) {
     setLoading(true)
     try {
       const response = await fetch(
-        `https://opentdb.com/api.php?amount=5&category=${categoryId}&difficulty=${difficulty}&type=multiple`
+        `https://opentdb.com/api.php?amount=10&category=${categoryId}&difficulty=${difficulty}&type=multiple`
       )
       const data = await response.json()
       console.log('Questions reçues:', data.results)
