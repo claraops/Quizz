@@ -218,8 +218,8 @@ const styles = {
   },
   progress: {
   timerInline: {
-    fontFamily: 'Press Start 2P, system-ui',
-    fontSize: '18px',
+    fontFamily: 'Bangers, system-ui',
+    fontSize: '32px',
     color: '#ffe27a',
     textShadow: '0 2px 0 #1a1a1a, 0 0 12px rgba(255,226,122,0.6)',
     letterSpacing: '1px',
