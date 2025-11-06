@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useQuiz } from '../context/QuizContext.jsx'
 import beachImg from '../../images/Beach.jpeg'
 
 export default function Game() {
+  const navigate = useNavigate()
+  const { playerName } = useQuiz()
+
   const mockQuestions = [
     {
       question: 'QUEL EST LE PLUS GRAND OCÉAN DU MONDE ?',
@@ -22,40 +26,43 @@ export default function Game() {
   ]
 
   const [qIndex, setQIndex] = useState(0)
-  const current = mockQuestions[qIndex]
-  const total = mockQuestions.length
   const [selectedIdx, setSelectedIdx] = useState(null)
   const [score, setScore] = useState(0)
   const [timeLeft, setTimeLeft] = useState(10)
-  const { playerName } = useQuiz()
+  const total = mockQuestions.length
+  const current = mockQuestions[qIndex]
 
+  // Reset timer and selection when question changes
   useEffect(() => {
     setTimeLeft(10)
     setSelectedIdx(null)
   }, [qIndex])
 
+  // Countdown effect; when it hits 0 without answer, auto-advance
   useEffect(() => {
     if (selectedIdx !== null) return
     const timer = setInterval(() => {
       setTimeLeft((t) => {
         if (t <= 1) {
           clearInterval(timer)
+          // mark as missed
           setSelectedIdx(-1)
           setTimeout(() => {
             if (qIndex < total - 1) {
               setQIndex((i) => i + 1)
             } else {
-              setQIndex(0)
-              setScore(0)
+              sessionStorage.setItem('lastScore', String(score))
+              sessionStorage.setItem('lastTotal', String(total))
+              navigate(`/results?score=${score}&total=${total}`)
             }
-          }, 900)
+          }, 800)
           return 0
         }
         return t - 1
       })
     }, 1000)
     return () => clearInterval(timer)
-  }, [selectedIdx, qIndex, total])
+  }, [selectedIdx, qIndex, total, score, navigate])
 
   return (
     <div style={styles.page}>
@@ -137,12 +144,16 @@ export default function Game() {
               style={{ ...styles.nextBtn, ...(selectedIdx === null ? styles.nextBtnDisabled : {}) }}
               disabled={selectedIdx === null}
               onClick={() => {
-                if (selectedIdx === current.correctIndex) setScore((s) => s + 1)
+                const isGood = selectedIdx === current.correctIndex
+                const nextScore = isGood ? score + 1 : score
                 if (qIndex < total - 1) {
+                  setScore(nextScore)
                   setQIndex((i) => i + 1)
+                  setSelectedIdx(null)
                 } else {
-                  setQIndex(0)
-                  setScore(0)
+                  sessionStorage.setItem('lastScore', String(nextScore))
+                  sessionStorage.setItem('lastTotal', String(total))
+                  navigate(`/results?score=${nextScore}&total=${total}`)
                 }
               }}
             >
@@ -206,6 +217,30 @@ const styles = {
     letterSpacing: '2px',
   },
   progress: {
+  timerInline: {
+    fontFamily: 'Press Start 2P, system-ui',
+    fontSize: '18px',
+    color: '#ffe27a',
+    textShadow: '0 2px 0 #1a1a1a, 0 0 12px rgba(255,226,122,0.6)',
+    letterSpacing: '1px',
+    lineHeight: 1,
+    width: '72px',
+    height: '72px',
+    display: 'grid',
+    placeItems: 'center',
+    borderRadius: '999px',
+    background: 'radial-gradient(100% 100% at 50% 0%, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0.25) 100%)',
+    border: '6px solid rgba(255,255,255,0.35)',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.35), inset 0 4px 12px rgba(0,0,0,0.25)'
+  },
+  timerInlineWarn: {
+    color: '#ffd37a',
+    textShadow: '0 2px 0 #a14b00, 0 0 10px rgba(255,211,122,0.55)'
+  },
+  timerInlineDanger: {
+    color: '#ffdfdf',
+    textShadow: '0 2px 0 #7a0b0b, 0 0 10px rgba(255,120,120,0.6)'
+  },
     fontFamily: 'Press Start 2P, system-ui',
     fontSize: '14px',
     color: '#ffffff',
@@ -218,22 +253,7 @@ const styles = {
     right: 24,
     zIndex: 5
   },
-  timerInline: {
-    fontFamily: 'Bangers, system-ui',
-    fontSize: '28px',
-    color: '#ffe27a',
-    textShadow: '0 3px 0 #1a1a1a',
-    letterSpacing: '2px',
-    lineHeight: 1,
-  },
-  timerInlineWarn: {
-    color: '#ffd37a',
-    textShadow: '0 3px 0 #a14b00'
-  },
-  timerInlineDanger: {
-    color: '#ffdfdf',
-    textShadow: '0 3px 0 #7a0b0b'
-  },
+  
   playerBox: {
     zIndex: 5,
     display: 'flex',
