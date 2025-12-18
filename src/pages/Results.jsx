@@ -13,7 +13,7 @@ export default function Results() {
   const total = Number(params.get('total') ?? sessionStorage.getItem('lastTotal') ?? 0)
 
   const scoreRatio = total > 0 ? score / total : 0
-  const percentage = Math.round(ratio * 100)
+  const percentage = Math.round(scoreRatio * 100)
   const message = useMemo(() => {
     if (scoreRatio >= 0.9) return 'BRAVO !'
     if (scoreRatio >= 0.7) return 'SUPER !'
