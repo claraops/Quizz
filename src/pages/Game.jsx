@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useQuiz } from '../context/QuizContext.jsx'
+import { useQuizSession } from '../hooks/useQuizSession.js'
 import './Game.css'
 
 export default function Game() {
-  const navigate = useNavigate()
   const { playerName, questions } = useQuiz()
+  const { navigateToResults } = useQuizSession()
   
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState(null)
@@ -152,34 +152,17 @@ export default function Game() {
 
   
   const goToNextQuestion = useCallback(() => {
-    
     const currentScore = scoreRef.current
     const avgResponse = responseTimeRef.current
-
-    
-    try {
-      sessionStorage.setItem('lastScore', String(currentScore))
-      sessionStorage.setItem('lastTotal', String(totalQuestions * 10))
-    } catch (e) {
-     
-    }
 
     setCurrentQuestionIndex(prevIndex => {
       const nextIndex = prevIndex + 1
 
       if (nextIndex < totalQuestions) {
-        
         return nextIndex
       } else {
-        
-        navigate('/results', {
-          state: {
-            score: currentScore,
-            totalQuestions,
-            averageResponseTime: avgResponse
-          }
-        })
-        
+        // Utilisation du hook pour centraliser la navigation et la sauvegarde
+        navigateToResults(currentScore, totalQuestions, avgResponse)
         return prevIndex
       }
     })
@@ -194,7 +177,7 @@ export default function Game() {
     }
     isTransitioningRef.current = false
   
-  }, [navigate, totalQuestions])
+  }, [navigateToResults, totalQuestions])
 
   
   if (!currentQuestion || shuffledAnswers.length === 0) {

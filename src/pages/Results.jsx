@@ -1,16 +1,16 @@
 import { useMemo } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useQuiz } from '../context/QuizContext.jsx'
-import beachImg from '../../images/Beach.jpeg'
+import { useQuizSession } from '../hooks/useQuizSession.js'
 import './Results.css'
 
 export default function Results() {
   const navigate = useNavigate()
-  const [params] = useSearchParams()
   const { playerName } = useQuiz()
+  const { getScore } = useQuizSession()
 
-  const score = Number(params.get('score') ?? sessionStorage.getItem('lastScore') ?? 0)
-  const total = Number(params.get('total') ?? sessionStorage.getItem('lastTotal') ?? 0)
+  // Utilisation du hook pour récupérer le score de manière centralisée
+  const { score, total } = getScore()
 
   const ratio = total > 0 ? score / total : 0
   const percent = Math.round(ratio * 100)
@@ -80,63 +80,3 @@ export default function Results() {
 
 
 
-
-
-
-/*import { useLocation, useNavigate } from 'react-router-dom'
-import './Results.css'
-
-export default function Results() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { score = 0, totalQuestions = 0 } = location.state || {}
-
-  const calculatePercentage = () => {
-    return totalQuestions > 0 ? Math.round((score / (totalQuestions * 10)) * 100) : 0
-  }
-
-  const getMessage = () => {
-    const percentage = calculatePercentage()
-    if (percentage >= 90) return "Excellent ! 🎉"
-    if (percentage >= 70) return "Très bien ! 👍"
-    if (percentage >= 50) return "Pas mal ! 😊"
-    return "Peut mieux faire ! 💪"
-  }
-
-  return (
-    <div className="results-page">
-      <div className="results-overlay">
-        <div className="results-card">
-          <h1 className="results-title">RÉSULTATS</h1>
-          
-          <div className="results-score">
-            <div className="results-percentage">{calculatePercentage()}%</div>
-            <div className="results-points">{score} points</div>
-            <div className="results-message">{getMessage()}</div>
-          </div>
-
-          <div className="results-details">
-            <p>Score final: <strong>{score}</strong> points</p>
-            <p>Nombre de questions: <strong>{totalQuestions}</strong></p>
-            <p>Score maximum possible: <strong>{totalQuestions * 10}</strong> points</p>
-          </div>
-
-          <div className="results-actions">
-            <button 
-              className="results-button"
-              onClick={() => navigate('/')}
-            >
-              Nouveau Quiz
-            </button>
-            <button 
-              className="results-button secondary"
-              onClick={() => navigate('/game')}
-            >
-              Rejouer
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}*/
