@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuiz } from '../context/QuizContext.jsx'
 import beachImg from '/images/Beach.jpeg'
@@ -14,14 +14,20 @@ export default function Home() {
     fetchQuestions, loading 
   } = useQuiz()
 
-   console.log('Home - questions:', questions) 
-  console.log('Home - fetchQuestions:', fetchQuestions) 
+  const [categories, setCategories] = useState([])
 
-  const categories = [
-    { id: '21', name: 'Sports' },
-    { id: '18', name: 'Informatique' },
-    { id: '11', name: 'Cinéma' },
-  ]
+  useEffect(() => {
+    async function getCategories() {
+      try {
+        const response = await fetch('https://opentdb.com/api_category.php')
+        const data = await response.json()
+        setCategories(data.trivia_categories)
+      } catch (error) {
+        console.error('Erreur récupération catégories:', error)
+      }
+    }
+    getCategories()
+  }, [])
 
   const canStart = useMemo(() => {
     return playerName.trim().length > 0 && categoryId && difficulty
