@@ -1,0 +1,24 @@
+.game-question-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  margin-top: -10px;
+}
+
+.game-question-card {
+  background: #ffffff;
+  border: 6px solid #2b64ff;
+  border-radius: 20px;
+  padding: 20px 28px;
+  color: #1a1a1a;
+  max-width: 720px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.game-question-text {
+  font-family: 'Bangers', system-ui;
+  font-size: 36px;
+  line-height: 1.1;
+  text-align: left;
+}
+

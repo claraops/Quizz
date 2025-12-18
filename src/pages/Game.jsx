@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuiz } from '../context/QuizContext.jsx'
+import TimerBar from '../components/game/TimerBar.jsx'
+import QuestionCard from '../components/game/QuestionCard.jsx'
+import AnswerGrid from '../components/game/AnswerGrid.jsx'
 import './Game.css'
 
 export default function Game() {
@@ -88,7 +91,7 @@ export default function Game() {
       }
     }
     
-  }, [currentQuestion, answered]) 
+  }, [currentQuestion, answered, handleTimeUp]) 
   const calculatePoints = useCallback((timeUsed, isCorrect) => {
     if (!isCorrect) return 0
     const basePoints = 10
@@ -219,46 +222,15 @@ export default function Game() {
             </div>
           </header>
 
-          <section className="game-question-row">
-            <div className="game-question-card">
-              <div 
-                className="game-question-text"
-                dangerouslySetInnerHTML={{ __html: currentQuestion.question }}
-              />
-            </div>
-          </section>
+          <QuestionCard question={currentQuestion.question} />
 
-          <section className="game-answers-grid">
-            {shuffledAnswers.map((answer, index) => {
-              const isSelected = selectedAnswer === answer
-              const isCorrect = answer === currentQuestion.correct_answer
-              const showResults = answered
-              
-              let answerClass = 'game-answer-card'
-              if (showResults) {
-                if (isCorrect) answerClass += ' game-answer-correct'
-                else if (isSelected && !isCorrect) answerClass += ' game-answer-wrong'
-                else answerClass += ' game-answer-disabled'
-              }
-
-              return (
-                <div
-                  key={`answer-${currentQuestionIndex}-${index}`}
-                  className={answerClass}
-                  onClick={() => handleAnswer(answer)}
-                  style={{ pointerEvents: answered ? 'none' : 'auto' }}
-                >
-                  <span className="game-answer-badge">
-                    {String.fromCharCode(65 + index)}
-                  </span>
-                  <span 
-                    className="game-answer-label"
-                    dangerouslySetInnerHTML={{ __html: answer }}
-                  />
-                </div>
-              )
-            })}
-          </section>
+          <AnswerGrid
+            answers={shuffledAnswers}
+            selectedAnswer={selectedAnswer}
+            correctAnswer={currentQuestion.correct_answer}
+            answered={answered}
+            onAnswerClick={handleAnswer}
+          />
 
           {answered && (
             <footer className="game-footer">
@@ -281,13 +253,7 @@ export default function Game() {
             </footer>
           )}
 
-          {/* Barre de progression du temps */}
-          <div className="time-progress-container">
-            <div 
-              className="time-progress-bar"
-              style={{ width: `${(timeLeft / 10) * 100}%` }}
-            />
-          </div>
+          <TimerBar timeLeft={timeLeft} maxTime={10} />
         </div>
       </div>
     </div>
