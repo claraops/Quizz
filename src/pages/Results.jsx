@@ -12,19 +12,19 @@ export default function Results() {
   const score = Number(params.get('score') ?? sessionStorage.getItem('lastScore') ?? 0)
   const total = Number(params.get('total') ?? sessionStorage.getItem('lastTotal') ?? 0)
 
-  const ratio = total > 0 ? score / total : 0
-  const percent = Math.round(ratio * 100)
+  const scoreRatio = total > 0 ? score / total : 0
+  const percentage = Math.round(ratio * 100)
   const message = useMemo(() => {
-    if (ratio >= 0.9) return 'BRAVO !'
-    if (ratio >= 0.7) return 'SUPER !'
-    if (ratio >= 0.5) return 'BON ESSAI !'
+    if (scoreRatio >= 0.9) return 'BRAVO !'
+    if (scoreRatio >= 0.7) return 'SUPER !'
+    if (scoreRatio >= 0.5) return 'BON ESSAI !'
     return 'TU PEUX MIEUX FAIRE !'
-  }, [ratio])
+  }, [scoreRatio])
   const emoji = useMemo(() => {
-    if (ratio >= 0.8) return '🏆'
-    if (ratio >= 0.5) return '🙂'
+    if (scoreRatio >= 0.8) return '🏆'
+    if (scoreRatio >= 0.5) return '🙂'
     return '💪'
-  }, [ratio])
+  }, [scoreRatio])
 
   function handleReplay() {
     navigate('/')
@@ -42,19 +42,19 @@ export default function Results() {
             <div className="score-total">/ {total || '?'} pts</div>
           </div>
 
-          <div className="percent">{percent}%</div>
+          <div className="percent">{percentage}%</div>
 
           <div className="progress-wrap" aria-hidden>
             <div className="progress-track">
               <div 
                 className="progress-fill"
                 style={{
-                  width: `${percent}%`,
-                  background: ratio >= 0.9
+                  width: `${percentage}%`,
+                  background: scoreRatio >= 0.9
                     ? 'linear-gradient(90deg, #1ac05e, #31d67a)'
-                    : ratio >= 0.7
+                    : scoreRatio >= 0.7
                     ? 'linear-gradient(90deg, #ffd37a, #ffb347)'
-                    : ratio >= 0.5
+                    : scoreRatio >= 0.5
                     ? 'linear-gradient(90deg, #7ab8ff, #5aa0ff)'
                     : 'linear-gradient(90deg, #ff7a7a, #ff3b30)'
                 }}
