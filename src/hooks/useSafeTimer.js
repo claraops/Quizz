@@ -1,4 +1,4 @@
-/*import { useRef, useCallback, useEffect } from 'react'
+import { useRef, useCallback, useEffect } from 'react'
 
 export function useSafeTimer() {
   const intervalRef = useRef(null)
@@ -42,4 +42,3 @@ export function useSafeTimer() {
     clearTimeoutSafe
   }
 }
-*/
