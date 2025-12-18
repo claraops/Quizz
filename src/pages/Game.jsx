@@ -1,210 +1,185 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuiz } from '../context/QuizContext.jsx'
+import { useSafeTimer } from '../hooks/useSafeTimer'
+import {
+  QUESTION_TIME_SECONDS,
+  TIMER_INTERVAL_MS,
+  NEXT_QUESTION_DELAY_MS,
+  BASE_POINTS,
+  BONUS_TIME_LIMIT
+} from '../constants/constants'
 import './Game.css'
 
 export default function Game() {
   const navigate = useNavigate()
   const { playerName, questions } = useQuiz()
-  
+
+  /* -------------------- ÉTATS -------------------- */
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState(null)
   const [score, setScore] = useState(0)
-  const [timeLeft, setTimeLeft] = useState(10)
+  const [timeLeft, setTimeLeft] = useState(QUESTION_TIME_SECONDS)
   const [answered, setAnswered] = useState(false)
   const [shuffledAnswers, setShuffledAnswers] = useState([])
   const [responseTime, setResponseTime] = useState(0)
   const [questionStartTime, setQuestionStartTime] = useState(0)
 
-  
+  /* -------------------- REFS -------------------- */
+  // Permet d’avoir les valeurs à jour dans les callbacks
   const scoreRef = useRef(score)
   const responseTimeRef = useRef(responseTime)
   const isTransitioningRef = useRef(false)
-  const timeoutRef = useRef(null)
-  const intervalRef = useRef(null)
 
-  
-  useEffect(() => { scoreRef.current = score }, [score])
-  useEffect(() => { responseTimeRef.current = responseTime }, [responseTime])
+  // Utilisé dans le bouton "Question suivante"
+  // (sinon ReferenceError au clic)
+  const timeoutRef = useRef(null)
+
+  /* -------------------- TIMERS SAFE -------------------- */
+  const {
+    setIntervalSafe,
+    setTimeoutSafe,
+    clearIntervalSafe,
+    clearTimeoutSafe
+  } = useSafeTimer()
+
+  /* -------------------- SYNCHRONISATION DES REFS -------------------- */
+  useEffect(() => {
+    scoreRef.current = score
+  }, [score])
+
+  useEffect(() => {
+    responseTimeRef.current = responseTime
+  }, [responseTime])
 
   const currentQuestion = questions[currentQuestionIndex]
   const totalQuestions = questions.length
 
+  /* -------------------- MÉLANGE DES RÉPONSES -------------------- */
   const shuffleAnswers = useCallback((question) => {
     if (!question) return []
-    const allAnswers = [
-      ...question.incorrect_answers,
-      question.correct_answer
-    ]
-    return [...allAnswers].sort(() => Math.random() - 0.5)
+    return [...question.incorrect_answers, question.correct_answer]
+      .sort(() => Math.random() - 0.5)
   }, [])
 
-  
+  /* -------------------- RESET À CHAQUE QUESTION -------------------- */
   useEffect(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
-    }
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-      timeoutRef.current = null
-      isTransitioningRef.current = false
-    }
+    clearIntervalSafe()
+    clearTimeoutSafe()
+    isTransitioningRef.current = false
 
     if (currentQuestion) {
       setShuffledAnswers(shuffleAnswers(currentQuestion))
-      setTimeLeft(10)
+      setTimeLeft(QUESTION_TIME_SECONDS)
       setAnswered(false)
       setSelectedAnswer(null)
       setResponseTime(0)
       setQuestionStartTime(Date.now())
-      isTransitioningRef.current = false
     }
-  }, [currentQuestion, shuffleAnswers])
+  }, [currentQuestion, shuffleAnswers, clearIntervalSafe, clearTimeoutSafe])
 
-  
+  /* -------------------- CALCUL DES POINTS -------------------- */
+  const calculatePoints = useCallback((timeUsed, isCorrect) => {
+    if (!isCorrect) return 0
+    const bonus = Math.max(0, BONUS_TIME_LIMIT - timeUsed)
+    return BASE_POINTS + bonus
+  }, [])
+
+  /* -------------------- QUESTION SUIVANTE / FIN -------------------- */
+  // ⚠️ Doit être déclaré AVANT scheduleNext
+  const goToNextQuestion = useCallback(() => {
+    clearIntervalSafe()
+    clearTimeoutSafe()
+
+    const currentScore = scoreRef.current
+    const avgResponse = responseTimeRef.current
+
+    try {
+      sessionStorage.setItem('lastScore', String(currentScore))
+      sessionStorage.setItem('lastTotal', String(totalQuestions * BASE_POINTS))
+    } catch {}
+
+    setCurrentQuestionIndex(prev => {
+      const next = prev + 1
+      if (next < totalQuestions) return next
+
+      navigate('/results', {
+        state: {
+          score: currentScore,
+          totalQuestions,
+          averageResponseTime: avgResponse
+        }
+      })
+      return prev
+    })
+  }, [navigate, totalQuestions, clearIntervalSafe, clearTimeoutSafe])
+
+  /* -------------------- TRANSITION QUESTION SUIVANTE -------------------- */
+  // ⚠️ Doit être déclaré AVANT handleTimeUp et handleAnswer
+  const scheduleNext = useCallback(() => {
+    if (isTransitioningRef.current) return
+    isTransitioningRef.current = true
+
+    timeoutRef.current = setTimeoutSafe(() => {
+      isTransitioningRef.current = false
+      goToNextQuestion()
+    }, NEXT_QUESTION_DELAY_MS)
+  }, [goToNextQuestion, setTimeoutSafe])
+
+  /* -------------------- TEMPS ÉCOULÉ -------------------- */
+  const handleTimeUp = useCallback(() => {
+    if (answered) return
+
+    const timeUsed = Math.round((Date.now() - questionStartTime) / 1000)
+    setResponseTime(timeUsed)
+    setAnswered(true)
+
+    scheduleNext()
+  }, [answered, questionStartTime, scheduleNext])
+
+  /* -------------------- TIMER PRINCIPAL -------------------- */
   useEffect(() => {
     if (!currentQuestion || answered) return
 
-    intervalRef.current = setInterval(() => {
+    setIntervalSafe(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
-        
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current)
-            intervalRef.current = null
-          }
+          clearIntervalSafe()
           handleTimeUp()
           return 0
         }
         return prev - 1
       })
-    }, 1000)
+    }, TIMER_INTERVAL_MS)
 
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-        intervalRef.current = null
-      }
-    }
-    
-  }, [currentQuestion, answered]) 
-  const calculatePoints = useCallback((timeUsed, isCorrect) => {
-    if (!isCorrect) return 0
-    const basePoints = 10
-    const timeBonus = Math.max(0, 10 - timeUsed)
-    return basePoints + timeBonus
-  }, [])
+    return clearIntervalSafe
+  }, [currentQuestion, answered, handleTimeUp, setIntervalSafe, clearIntervalSafe])
 
-  /* Planifier la transition vers la question suivante de façon sûre (évite doublons)*/
-  const scheduleNext = useCallback((delay = 1500) => {
-    if (isTransitioningRef.current) return
-    isTransitioningRef.current = true
-
-   
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-      timeoutRef.current = null
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      timeoutRef.current = null
-      isTransitioningRef.current = false
-      goToNextQuestion()
-    }, delay)
-  }, []) 
-
-  const handleTimeUp = useCallback(() => {
-    if (answered) return
-    const endTime = Date.now()
-    const timeUsed = Math.round((endTime - questionStartTime) / 1000)
-    setResponseTime(timeUsed)
-    setAnswered(true)
-    
-    scheduleNext(1500)
-    
-  }, [answered, questionStartTime, scheduleNext])
-
+  /* -------------------- RÉPONSE DU JOUEUR -------------------- */
   const handleAnswer = useCallback((answer) => {
     if (answered) return
-    const endTime = Date.now()
-    const timeUsed = Math.round((endTime - questionStartTime) / 1000)
 
+    const timeUsed = Math.round((Date.now() - questionStartTime) / 1000)
     setSelectedAnswer(answer)
     setAnswered(true)
     setResponseTime(timeUsed)
 
-    const isCorrect = answer === currentQuestion.correct_answer
-    if (isCorrect) {
-      const pointsEarned = calculatePoints(timeUsed, isCorrect)
+    if (answer === currentQuestion.correct_answer) {
       setScore(prev => {
-        const next = prev + pointsEarned
-        
+        const next = prev + calculatePoints(timeUsed, true)
         scoreRef.current = next
         return next
       })
     }
 
-   
-    scheduleNext(1500)
-   
+    scheduleNext()
   }, [answered, currentQuestion, questionStartTime, calculatePoints, scheduleNext])
 
-  
-  const goToNextQuestion = useCallback(() => {
-    
-    const currentScore = scoreRef.current
-    const avgResponse = responseTimeRef.current
-
-    
-    try {
-      sessionStorage.setItem('lastScore', String(currentScore))
-      sessionStorage.setItem('lastTotal', String(totalQuestions * 10))
-    } catch (e) {
-     
-    }
-
-    setCurrentQuestionIndex(prevIndex => {
-      const nextIndex = prevIndex + 1
-
-      if (nextIndex < totalQuestions) {
-        
-        return nextIndex
-      } else {
-        
-        navigate('/results', {
-          state: {
-            score: currentScore,
-            totalQuestions,
-            averageResponseTime: avgResponse
-          }
-        })
-        
-        return prevIndex
-      }
-    })
-
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-      timeoutRef.current = null
-    }
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
-    }
-    isTransitioningRef.current = false
-  
-  }, [navigate, totalQuestions])
-
-  
+  /* -------------------- LOADING -------------------- */
   if (!currentQuestion || shuffledAnswers.length === 0) {
-    return (
-      <div className="game-loading">
-        <h2>Chargement des questions...</h2>
-      </div>
-    )
+    return <div className="game-loading"><h2>Chargement...</h2></div>
   }
-
+  /* -------------------- RENDER -------------------- */
   return (
     <div className="game-page">
       <div className="game-overlay">
@@ -293,6 +268,3 @@ export default function Game() {
     </div>
   )
 }
-
-
-

@@ -67,7 +67,7 @@ export function QuizProvider({ children }) {
 
   return <QuizContext.Provider value={value}>{children}</QuizContext.Provider>
 }
-
+/*** ** REFZIRE LE RENOMMAGE DE VARIABLE**** */
 export function useQuiz() {
   const ctx = useContext(QuizContext)
   if (!ctx) throw new Error('useQuiz must be used within QuizProvider')

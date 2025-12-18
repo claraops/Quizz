@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuiz } from '../context/QuizContext.jsx'
-import beachImg from '../../images/Beach.jpeg'
+import beachImg from '/images/Beach.jpeg'
 import './Home.css'
 
 export default function Home() {
